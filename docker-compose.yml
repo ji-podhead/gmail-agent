@@ -1,19 +1,49 @@
-version: "3.8"
+version: "3.9"
 services:
   gmail:
-    image: localhost/mcp-headless-gmail:latest
+    image: python:3.11-slim
     ports:
-      - "3000:3000"
-    entrypoint: mcp-server-headless-gmail
+      - "8000:3000"
+
+    working_dir: /app
+    command: bash -c "apt-get update && apt-get install -y git && pip install --upgrade pip && \
+                    git clone https://github.com/baryhuang/mcp-headless-gmail  \
+                    git clone  https://github.com/SecretiveShell/MCP-Bridge  \
+                    ls \
+                    cd mcp-headless-gmail-main \
+                    pip install -e . && \
+                    python ./mcp_server_headless_gmail/src/mcp_server_headless_gmail/server.py && \
+                    python ./email_mcp/email_filter.py && \
+                    python ./email_mcp/email_server.py"
     privileged: true
     restart: always
     tty: true
     network_mode: host
     volumes:
-      - mcp-gmail:/gmail-server
+      - ./:/app
       - ./gcp-oauth.keys.json:/gcp-oauth.keys.json
     environment:
+      MCP_BRIDGE__CONFIG__FILE: config.json # 
       GMAIL_OAUTH_PATH: /gcp-oauth.keys.json
       GMAIL_CREDENTIALS_PATH: /gmail-server/credentials.json
-volumes:
-  mcp-gmail:
+
+#   mcp-bridge:
+#     build:
+#       context: .
+#     develop:
+#       watch:
+#         - path: mcp_bridge
+#           action: rebuild
+#     container_name: mcp-bridge
+#     ports:
+#       - "8000:8000"
+#     environment:
+#       - MCP_BRIDGE__CONFIG__FILE=config.json # mount the config file for this to work
+#       # - MCP_BRIDGE__CONFIG__HTTP_URL=http://10.88.100.170:8888/config.json
+#       # - MCP_BRIDGE__CONFIG__JSON=
+#     # volumes:
+#     #   - ./config.json:/mcp_bridge/config.json
+#     restart: unless-stopped
+
+# volumes:
+#   mcp-gmail:

@@ -1,0 +1,12 @@
+{
+    "inference_server": {
+       "base_url": "http://example.com/v1",
+       "api_key": "None"
+    },
+    "mcp_servers": {
+       "fetch": {
+         "command": "uvx",
+         "args": ["mcp_server_headless_gmail"]
+       }
+    }
+ }

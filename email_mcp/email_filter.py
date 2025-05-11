@@ -7,13 +7,13 @@ from google import genai
 from google.generativeai import types
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
-
+from mcp.client.http import HttpServerParameters, http_client # Import für HTTP
 # Load environment variables
 load_dotenv()
 
 # Gemini API key
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
+MCP_SERVER_BASE_URL = os.getenv("MCP_SERVER_URL", "http://localhost:8000/mcp") # Beispiel
 async def categorize_email(email_body):
     """Categorizes email content using Gemini API."""
     client = genai.Client(api_key=GEMINI_API_KEY)
@@ -23,6 +23,11 @@ async def categorize_email(email_body):
         command="mcp-flight-search",
         args=["--connection_type", "stdio"],
         env={"SERP_API_KEY": os.getenv("SERP_API_KEY")},
+    )
+    server_params_transport = HttpServerParameters(
+        base_url=MCP_SERVER_BASE_URL,
+        # headers=custom_headers, # Fügen Sie dies hinzu, wenn Ihr MCP-Server benutzerdefinierte Header erwartet
+        # timeout_seconds=30, # Optional: Timeout für HTTP-Anfragen
     )
 
     async with stdio_client(server_params) as (read, write):
