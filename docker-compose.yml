@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  gmail:
+    image: localhost/mcp-headless-gmail:latest
+    ports:
+      - "3000:3000"
+    entrypoint: mcp-server-headless-gmail
+    privileged: true
+    restart: always
+    tty: true
+    network_mode: host
+    volumes:
+      - mcp-gmail:/gmail-server
+      - ./gcp-oauth.keys.json:/gcp-oauth.keys.json
+    environment:
+      GMAIL_OAUTH_PATH: /gcp-oauth.keys.json
+      GMAIL_CREDENTIALS_PATH: /gmail-server/credentials.json
+volumes:
+  mcp-gmail:
