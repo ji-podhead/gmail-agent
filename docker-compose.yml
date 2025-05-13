@@ -6,15 +6,17 @@ services:
       - "8000:3000"
 
     working_dir: /app
-    command: bash -c "apt-get update && apt-get install -y git && pip install --upgrade pip && \
-                    git clone https://github.com/baryhuang/mcp-headless-gmail  \
-                    git clone  https://github.com/SecretiveShell/MCP-Bridge  \
-                    ls \
-                    cd mcp-headless-gmail-main \
-                    pip install -e . && \
-                    python ./mcp_server_headless_gmail/src/mcp_server_headless_gmail/server.py && \
-                    python ./email_mcp/email_filter.py && \
-                    python ./email_mcp/email_server.py"
+    command: bash -c "apt-get update && apt install -y tar curl && pip install --upgrade pip "
+                    curl -L https://github.com/baryhuang/mcp-headless-gmail/archive/refs/heads/main.tar.gz -o mcp-headless-gmail-main.tar.gz && \
+                    tar -xzf mcp-headless-gmail-main.tar.gz && \
+                    curl -L https://github.com/SecretiveShell/MCP-Bridge/archive/refs/heads/main.tar.gz -o MCP-Bridge-main.tar.gz && \
+                    tar -xzf MCP-Bridge-main.tar.gz && \
+                    pip install -e ./mcp-headless-gmail-main && \
+                    cd ./MCP-Bridge-main && \
+                    uv sync && \
+                    cd ../ && \
+                    uv run mcp_bridge/main.py"
+
     privileged: true
     restart: always
     tty: true
@@ -26,6 +28,12 @@ services:
       MCP_BRIDGE__CONFIG__FILE: config.json # 
       GMAIL_OAUTH_PATH: /gcp-oauth.keys.json
       GMAIL_CREDENTIALS_PATH: /gmail-server/credentials.json
+
+#pip install --upgrade pip && 
+                    # git clone https://github.com/baryhuang/mcp-headless-gmail  \
+                    # git clone  https://github.com/SecretiveShell/MCP-Bridge  \
+                    # python ./email_mcp/email_filter.py && \
+                    # python ./email_mcp/email_server.py"
 
 #   mcp-bridge:
 #     build:
