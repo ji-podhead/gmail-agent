@@ -1,33 +1,30 @@
 version: "3.9"
 services:
   gmail:
-    image: python:3.11-slim
+    image: python:3.11
     ports:
       - "8000:3000"
-
     working_dir: /app
-    command: bash -c "apt-get update && apt install -y tar curl && pip install --upgrade pip "
-                    curl -L https://github.com/baryhuang/mcp-headless-gmail/archive/refs/heads/main.tar.gz -o mcp-headless-gmail-main.tar.gz && \
-                    tar -xzf mcp-headless-gmail-main.tar.gz && \
-                    curl -L https://github.com/SecretiveShell/MCP-Bridge/archive/refs/heads/main.tar.gz -o MCP-Bridge-main.tar.gz && \
-                    tar -xzf MCP-Bridge-main.tar.gz && \
-                    pip install -e ./mcp-headless-gmail-main && \
-                    cd ./MCP-Bridge-main && \
-                    uv sync && \
-                    cd ../ && \
-                    uv run mcp_bridge/main.py"
-
+    command: bash -c "sh ../scripts/headless_gmail.sh"
     privileged: true
-    restart: always
+    # restart: always
     tty: true
     network_mode: host
     volumes:
-      - ./:/app
+      - ./data/:/app
+      - ./scripts:/scripts
       - ./gcp-oauth.keys.json:/gcp-oauth.keys.json
     environment:
       MCP_BRIDGE__CONFIG__FILE: config.json # 
       GMAIL_OAUTH_PATH: /gcp-oauth.keys.json
       GMAIL_CREDENTIALS_PATH: /gmail-server/credentials.json
+
+
+
+#  curl -L https://github.com/baryhuang/mcp-headless-gmail/archive/refs/heads/main.tar.gz -o mcp-headless-gmail-main.tar.gz && \
+#                     tar -xzf mcp-headless-gmail-main.tar.gz && \
+#                     pip install -e ./mcp-headless-gmail-main && \
+
 
 #pip install --upgrade pip && 
                     # git clone https://github.com/baryhuang/mcp-headless-gmail  \
@@ -56,19 +53,3 @@ services:
 # volumes:
 #   mcp-gmail:
 
-gcloud compute firewall-rules create allow-rdp-ingress-from-iap \
-  --direction=INGRESS \
-  --action=allow \
-  --rules=tcp:22 \
-  --source-ranges=176.0.58.230/30
-
-gcloud compute config-ssh --dry-run --project gmail-demo-459708
-
-gcloud compute start-iap-tunnel instance-20250513-104345  3389 --local-host-port=localhost:22 --zone=us-central1-c
-
-gcloud workstations start-tcp-tunnel \
-  --project=gmail-demo-459708 \
-  --region=us-central1-c \
-  --cluster=instance-20250513-104345 \
-  --local-host-port=:2023 \
-  instance-20250513-104345 22
