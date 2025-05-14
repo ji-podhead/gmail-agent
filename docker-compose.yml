@@ -55,3 +55,20 @@ services:
 
 # volumes:
 #   mcp-gmail:
+
+gcloud compute firewall-rules create allow-rdp-ingress-from-iap \
+  --direction=INGRESS \
+  --action=allow \
+  --rules=tcp:22 \
+  --source-ranges=176.0.58.230/30
+
+gcloud compute config-ssh --dry-run --project gmail-demo-459708
+
+gcloud compute start-iap-tunnel instance-20250513-104345  3389 --local-host-port=localhost:22 --zone=us-central1-c
+
+gcloud workstations start-tcp-tunnel \
+  --project=gmail-demo-459708 \
+  --region=us-central1-c \
+  --cluster=instance-20250513-104345 \
+  --local-host-port=:2023 \
+  instance-20250513-104345 22
